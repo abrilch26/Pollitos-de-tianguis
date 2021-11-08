@@ -1,26 +1,30 @@
-const $canvas=document.querySelector("canvas1");
-const $startButton = document.querySelector("start-button");
+const $canvas=document.querySelector("canvas");
 const ctx = $canvas.getContext("2d");
 
+// VARIABLES GLOBALES
 let frames = 0;
+const friction = 0.9;
+const keys = {};
 
-window.onload = () => {
-    document.getElementById("start-button").onclick = () => {
-        startGame();
-    };
+// CLASES
+    class GameAsset {
+        constructor (x, y, width, height, img) {
+            this.x = x;
+            this.y = y;
+            this.width = width;
+            this. heigth = height;
+            this.image = new Image ();
+            this.image.src = img;
+        }
 
-    class Board {
-        constructor () {
-            this.x = 0;
-            this.y = 0;
-            this.width = $canvas.width;
-            this.heigth = $canvas.height;
-            this.image = new Image();
-           // this.image.src = "/ FALTA IMAGEN DE BOARD!
+        draw () {
+            ctx.drawImage (this.image, this.x, this.y, this.width, this.height);
         }
-        
-        draw() {
-            this.y
-        }
+    }
+// ^ clase genérica ^
+
+class Board extends GameAsset {
+    constructor (x, y, width, height, img) {
+        super (x,y, width, height, img);
     }
 }
