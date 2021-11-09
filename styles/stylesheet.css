@@ -1,0 +1,27 @@
+
+body {
+    padding: 0;
+    text-align: center;
+}
+
+.game-intro{
+    float: left;
+    padding: 0%,10%;
+}
+
+#start-button {
+    font-size: 20px;
+    background-color: rgb(157, 93, 176);
+    color: #fff;
+    padding: 15px 35px;
+    border: 0;
+    box-shadow: 0;
+    border-radius: 60px;
+    margin-bottom: 20px;
+  }
+
+  #game-board {
+    float: left;
+   margin: 20px 20px;
+}
+  
