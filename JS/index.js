@@ -1,14 +1,15 @@
 // TRAER ELEMENTOS DEL DOM
 const $canvas = document.querySelector("canvas");
-const $startButton = document.querySelector("button");
+const $startButton = document.querySelector("#start-button");
 const ctx = $canvas.getContext("2d")
 
 //variables globales
 let frames = 0;
 let intervalId;
-const gravity = 9.8;
-const death = [];
-let youlost = false;
+const gravity = .78;
+const friction =.8
+const deaths = []; //obstaculo
+let youLost = false;
 
 
 // DEFINIR CLASES Y MÉTODOS
@@ -19,20 +20,20 @@ class Background{
         this.width = $canvas.width;
         this.height = $canvas.height;
         this.image = new Image();
-        this.image.src = "/acr_images/lvl1Board.PNG"
+        this.image.src = boardImage //instancia en linea 94
     }
 
     draw() {
-        this.x--;
-        if (this.x < -this.width) thisx=0;
+        this.x--; // infinite img
+        if (this.x < -this.width) this.x=0;
         ctx.drawImage(this.image, this.x, this.y, this.width, this.height);
         ctx.drawImage(
-            this.image,
+			this.image,
 			this.x + this.width,
 			this.y,
 			this.width,
-			this.height 
-        );
+			this.height
+		);
     }
 }
 
@@ -44,8 +45,10 @@ class Pollito {
         this.width = 60;
         this.height = 60;
         this.vy = 3;
+        this.jumpStrength = 20;
         this.image = new Image();
         this.image.src = "/acr_images/blue_pollito.png"
+        this.image.onclick = this.draw();
     }
 
     draw () {
@@ -88,10 +91,11 @@ draw() {
 
 
 // CREAR INSTANCIAS DE LAS CLASES
-const background = new Background();
+boardImage = "/acr_images/skyline.purple.jpeg"
+const background = new Background(0,0, $canvas.width, $canvas.height, boardImage);
 const pollito = new Pollito();
 
-// FUNCIONES DE INTERACCION CON EL USUARIO
+// FUNCIONES DE FLUJO
 function start() {
     if (intervalId) return;
     intervalId = setInterval(() => {
@@ -109,12 +113,70 @@ function update () {
     gameOver();
 }
 
+function gameOver() {
+    if (youLost) { // FALTA AGREGAR IMAGEN Y DISEÑARLA QUE SE MUESTRE CUANDO PIERDAS
+        ctx.font = "60px bold sans-serif";
+        ctx.fillText("GAME OVER", $canvas.width / 3, $canvas.height / 3);
+    }
+}
+
+
+
+//FUNCIONES DE APOYO
 function clearCanvas() {
     ctx.clearRect(0, 0, $canvas.width, $canvas.height);
 }
 
 function generateDeath() {
     if(frames % 200 === 0) {
-        const // FALTA GENERAR OBSTÁCULOS SOBRE EL PISO DE MANERA RANDOM EN EJE DE X Y EJE DE Y
+        const limitHeight = 300;
+		const window = 200;
+		const randomHeight = Math.floor(Math.random() * limitHeight);
+		const skull1 = new Death(0, 50, randomHeight);
+		const skull2 = new Death(randomHeight + window, 50, $canvas.height - (randomHeight + window)
+		);
+
+		deaths.push(skull1);
+		deaths.push(skull2);
+	}
+// const obstaculo // FALTA GENERAR OBSTÁCULOS SOBRE EL PISO DE MANERA RANDOM (REVISAR)
+	deaths.forEach((obs, index) => {
+		if (obs.x + obs.width < 0) deaths.splice(1, index);
+	});
+}
+
+function crashes () {
+    if(pollito.crash()) {
+        clearInterval(intervalId);
+        youLost = true
+    }
+    deaths.forEach((obs) => {
+        clearInterval(intervalId);
+        youLost = true;
+    });
+}
+
+function drawDeath () {
+    deaths.forEach((death) => {
+        death.draw();
+    })
+}
+
+
+//USUARIO & KEYS
+document.onekeyup = (event) => {
+    switch (event.key) {
+        case " ":
+            pollito.jump();
+            break;
+            default:
+            break;
     }
 }
+        
+
+
+//iniciar juego
+$startButton.addEventListener ("click",event => {
+    start();
+});
