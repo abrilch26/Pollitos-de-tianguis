@@ -7,9 +7,10 @@ const ctx = $canvas.getContext("2d")
 let frames = 0;
 let intervalId;
 const gravity = .78;
-const friction =.8
 const deaths = []; //obstaculo
+const elotitos = []
 let youLost = false;
+
 
 
 // DEFINIR CLASES Y MÉTODOS
@@ -20,7 +21,7 @@ class Background{
         this.width = $canvas.width;
         this.height = $canvas.height;
         this.image = new Image();
-        this.image.src = boardImage //instancia en linea 94
+        this.image.src = boardImage //instancia en linea 120 ...ish
     }
 
     draw() {
@@ -38,30 +39,57 @@ class Background{
 }
 
 
+class Floor {
+    constructor(){
+        this.x = 0;
+        this.y = 320;
+        this.width = $canvas.width;
+        this.height = 50;
+        this.image = new Image();
+        this.image.src = "/acr_images/floor.png"
+        this.image.onload = this.draw()
+    }
+
+    draw() {
+        ctx.drawImage(this.image, this.x, this.y, this.width, this.height);
+    }
+}
+
+
 class Pollito {
     constructor () {
-        this.x = 0;
-        this.y = 0;
-        this.width = 60;
-        this.height = 60;
-        this.vy = 3;
-        this.jumpStrength = 20;
+        this.x = 40;
+        this.y = 280;
+        this.width = 55;
+        this.height = 55;
         this.image = new Image();
-        this.image.src = "/acr_images/blue_pollito.png"
-        this.image.onclick = this.draw();
+        this.image.src = "/acr_images/pink_pollito.PNG"
+        this.image.onload = this.draw();
+        // vertical  
+        this.vy = 0
+        this.vy= 0
+        this.jumping = false
+        this.jumpStrength = 12
     }
 
     draw () {
-        this.vy += gravity
-        this.y += this.vy;
+        ctx.drawImage(this.image, this.x, this.y, this.width, this.height);
+        if(this.y > $canvas.height - this.height) this.y = $canvas.height - this.height // Si 400 > (400-80) => this.y = 320
+        if (this.y < 0 ) this.y = 0; // Si 400 < 0  => this.y = 0
+        if( this.x > $canvas.width - this.width) this.x = $canvas.width - this.width // Si 600 > (600-80) => this.x = 520
+        if (this.x < 0 ) this.x = 0;
     }
 
-    crash() {
-        return this.y < 0 || this.y + this.height > $canvas.height;
+    jump(){
+        this.vy -= 6;
     }
 
-    jump() {
-        this.vy -= 3;
+    moveLeft(){
+        this.x -= 6
+    }
+
+    moveRight () {
+        this.x += 6
     }
 
     isTouching (death) {
@@ -74,28 +102,53 @@ class Pollito {
     }
 }
 
+
 class Death {
     constructor () {
-        this.y = 30; 
+        this.x = 970
+        this.y = 280; 
         this.width = 60; 
         this.height = 60; 
         this.image = new Image(); 
         this.image.src = "/acr_images/Death10px.png"
+        this.image.onload = this.draw();
+    }
+    
+    draw() {
+        this.x -= 6
+        ctx.drawImage(this.image, this.x, this.y, this.width, this.height)
+    }
 }
 
-draw() {
-    this.x--;
-    ctx.drawImage(this.image, this.x, this.y, this.width, this.height);
-}
+
+class Elotito {
+    constructor () {
+        this.x = 970;
+        this.y =  100;
+        this.width = 40;
+        this.height = 40;
+        this.image = new Image();
+        this.image.src = "/acr_images/elotito_hd.png"
+    } 
+
+    draw() {
+        this.x -= 4;
+        ctx.drawImage(this.image, this.x, this.y, this.width, this.height)
+    }
 }
 
 
-// CREAR INSTANCIAS DE LAS CLASES
+//-----------------------------------------   CREAR INSTANCIAS DE LAS CLASES     -----------------------------------//
 boardImage = "/acr_images/skyline.purple.jpeg"
 const background = new Background(0,0, $canvas.width, $canvas.height, boardImage);
 const pollito = new Pollito();
+const death = new Death();
+const floor = new Floor();
+const elotito = new Elotito();
 
-// FUNCIONES DE FLUJO
+
+
+// ----------------------------   FUNCIONES DE FLUJO   --------------------------------//
 function start() {
     if (intervalId) return;
     intervalId = setInterval(() => {
@@ -103,80 +156,127 @@ function start() {
     }, 1000 / 60);
 }
 
+function isTouching () {
+    death.forEach((death) => {
+        if(pollito.isTouching(death)) {
+            gameOver()
+        }
+    })
+}
+
 function update () {
     frames++
-    generateDeath();
+    checkKeys();
     clearCanvas();
-    background.draw();
-    pollito.draw();
-    drawDeath();
-    gameOver();
+    background.draw(); // fondo
+    floor.draw(); // piso estático
+    pollito.draw(); //character
+    if (frames % Math.floor(Math.random() * 4) === 0) { //obstáculos
+        drawDeath();
+    }
+    death.draw();
+
+    if(frames % Math.floor(Math.random() * 2) === 0) { // food
+        drawElotito ();
+    }
+    elotito.draw();
+ 
+
 }
 
 function gameOver() {
-    if (youLost) { // FALTA AGREGAR IMAGEN Y DISEÑARLA QUE SE MUESTRE CUANDO PIERDAS
+    youLost = true
+    if (youLost = true) { // FALTA AGREGAR IMAGEN Y DISEÑARLA PARA QUE SE MUESTRE CUANDO PIERDAS
         ctx.font = "60px bold sans-serif";
-        ctx.fillText("GAME OVER", $canvas.width / 3, $canvas.height / 3);
+        ctx.fillText("GAME OVER", $canvas.width / 2, $canvas.height / 2);
     }
 }
 
 
 
-//FUNCIONES DE APOYO
+//-----------------------------FUNCIONES DE APOYO-----------------------//
 function clearCanvas() {
     ctx.clearRect(0, 0, $canvas.width, $canvas.height);
 }
 
-function generateDeath() {
-    if(frames % 200 === 0) {
-        const limitHeight = 300;
-		const window = 200;
-		const randomHeight = Math.floor(Math.random() * limitHeight);
-		const skull1 = new Death(0, 50, randomHeight);
-		const skull2 = new Death(randomHeight + window, 50, $canvas.height - (randomHeight + window)
-		);
+function movePollito () {
+     if (pollito.y > floor - pollito.height) {
+        pollito.jumping = false
+        pollito.y = floor.y - pollito.height
+    } 
 
-		deaths.push(skull1);
-		deaths.push(skull2);
-	}
-// const obstaculo // FALTA GENERAR OBSTÁCULOS SOBRE EL PISO DE MANERA RANDOM (REVISAR)
-	deaths.forEach((obs, index) => {
-		if (obs.x + obs.width < 0) deaths.splice(1, index);
-	});
+
+   if (!pollito.jumping) {
+       jump.
+       pollito.vy = 0
+       pollito.jumping = true
+       pollito.vy += -pollito.jumpStrength * 2
+   }
 }
 
-function crashes () {
-    if(pollito.crash()) {
-        clearInterval(intervalId);
-        youLost = true
-    }
-    deaths.forEach((obs) => {
-        clearInterval(intervalId);
-        youLost = true;
-    });
+
+function generateDeath() { //GENERAR ENEMIGOS
+    if (frames % 100 !== 0) return
+    new Death()
+    deaths.push(death++)
 }
 
-function drawDeath () {
-    deaths.forEach((death) => {
-        death.draw();
+
+function drawDeath() { // DIBUJAR ENEMIGOS
+    deaths.forEach((death, index) => {
+        if (death.x  > 700) {
+            deaths.splice(index,1)
+        }
+        death.draw()
     })
 }
 
 
-//USUARIO & KEYS
-document.onekeyup = (event) => {
-    switch (event.key) {
-        case " ":
+function generateElotito() { // DIBUJAR AMIGO
+    if(frames % 100 !== 0) return
+    new Elotito()
+    elotitos.push(elotito++)
+}
+
+function drawElotito() { // DIBUJAR AMIGOS
+    elotitos.forEach((elotito, index) => {
+        if (death.x > 700) {
+            elotitos.splice(index, 1)
+        }
+        elotito.draw()
+    })
+}
+
+
+function deathCollition() {
+    deaths.forEach((death) => {
+        if (pollito.isTouching(death)) {
+            gameOver();
+            youLost = true
+        }
+    })
+}
+
+
+
+
+//------------------------------------   USUARIO & KEYS   -----------------------------------//
+function checkKeys() {
+document.onkeyup = (event) => { 
+   switch (event.key) {
+        case "ÀrrowUp":
             pollito.jump();
             break;
             default:
             break;
+        }
     }
 }
+
         
 
 
 //iniciar juego
-$startButton.addEventListener ("click",event => {
+$startButton.addEventListener ("click", event => {
     start();
 });
