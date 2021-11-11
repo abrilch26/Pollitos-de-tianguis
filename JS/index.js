@@ -15,6 +15,7 @@ const elotitos = [] // friend
 
 
 //--------------------------   DEFINIR CLASES Y MÉTODOS   --------------------------//
+
 class Background{
     constructor(){
         this.x = 0;
@@ -307,7 +308,8 @@ clearInterval(intervalId)
 lostGame.draw();
 //youLost.overSound()----------------------------------------------> SONIDO PENDIENTE
     }
-}
+} 
+
 
 function youWon() {
     if(score.score === 10)
