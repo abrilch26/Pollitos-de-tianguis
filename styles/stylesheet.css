@@ -2,6 +2,7 @@
 body {
     padding: 0;
     text-align: center;
+    background-color: rgb(210, 184, 234);
 }
 
 #instructions{
@@ -15,19 +16,24 @@ body {
 
 #start-button {
     font-size: 20px;
-    background-color: rgb(157, 93, 176);
+    background-color: rgb(108, 36, 141);
     color: #fff;
     padding: 15px 35px;
     border: 0;
     box-shadow: 0;
     border-radius: 60px;
-    margin-top: 20px;
+    margin-top: 40px;
     position: relative;
     justify-content: center;
   }
 
   #game-board {
       justify-content: center;
-      margin-top: 20px;
+      margin-top: 80px;
+      border: rgb(98, 86, 153);
 }
   
+#instructions {
+    position: relative;
+    justify-content:center;
+}

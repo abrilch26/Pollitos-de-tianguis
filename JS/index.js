@@ -11,23 +11,25 @@ const friction = .97;
 const keys = {}
 const deaths = []; //obstaculo
 const elotitos = [] // friend
+let win = false;
+let lose = false;
 
 
 
 //--------------------------   DEFINIR CLASES Y MÉTODOS   --------------------------//
 
 class Background{
-    constructor(){
-        this.x = 0;
-        this.y = 0;
-        this.width = $canvas.width;
-        this.height = $canvas.height;
+    constructor(x,y, width, height, image){
+        this.x = x;
+        this.y = y;
+        this.width = width;
+        this.height = height;
         this.image = new Image();
-        this.image.src = boardImage //instancia en linea 120 ...ish
+        this.image.src = image;
     }
 
     draw() {
-        this.x--; // infinite img
+        this.x--; 
         if (this.x < -this.width) this.x=0;
         ctx.drawImage(this.image, this.x, this.y, this.width, this.height);
         ctx.drawImage(
@@ -42,7 +44,7 @@ class Background{
 
 
 class Floor {
-    constructor(){
+    constructor(x,y){
         this.x = 0;
         this.y = 320;
         this.width = $canvas.width;
@@ -64,13 +66,13 @@ class Pollito {
         this.width = 55;
         this.height = 55;
         this.image = new Image();
-        this.image.src = "/acr_images/pink_pollito.PNG"
-        // vertical  
+        this.image.src = "/acr_images/pollito_azul.PNG"
+        // vertical  physics
         this.vx = 0
         this.vy= 0
         this.jumping = false
         this.jumps = 0
-        this.jumpStrength = 26
+        this.jumpStrength = 27
     }
 
     draw () {
@@ -131,9 +133,9 @@ class Pollito {
 
 
 class Death {
-    constructor () {
-        this.x = 900
-        this.y = 0; 
+    constructor (x, y) {
+        this.x = x;
+        this.y = y; 
         this.width = 60; 
         this.height = 60; 
         this.image = new Image(); 
@@ -141,7 +143,7 @@ class Death {
     }
     
     draw() {
-        this.x -= 6
+        this.x -= 3
         ctx.drawImage(this.image, this.x, this.y, this.width, this.height)
     }
 
@@ -157,9 +159,9 @@ class Death {
 
 
 class Elotito {
-    constructor () {
-        this.x = 970;
-        this.y =  100;
+    constructor (x, y) {
+        this.x = x;
+        this.y =  y;
         this.width = 40;
         this.height = 40;
         this.image = new Image();
@@ -167,7 +169,7 @@ class Elotito {
     } 
 
     draw() {
-        this.x -= 4;
+        this.x -= 5;
         ctx.drawImage(this.image, this.x, this.y, this.width, this.height)
     }
 
@@ -199,22 +201,22 @@ class Score {
 
 class WonGame {
     constructor () {
-        this.x = 0
+        this.x = 0 //---------------------------------> lkjoi
         this.y = 0
         this.width = $canvas.width
         this.height = $canvas.height
         this.image = new Image ()
         this.image.src = "/acr_images/you_won.JPEG"
-         //this.audio = new Audio ------------------------------------------------------AUDIO PENDIENTE
-        //this.audio.src = 
+        this.audio = new Audio 
+        this.audio.src = "/sounds/animals_cockrel_crow_001.mp3"
     }
     draw () {
         ctx.drawImage(this.image, this.x, this.y, this.width, this.height)
     }
-    //overSound () { -----------------------------------------------------------CONFIGURACIÓN DE AUDIO PENDIENTE
-      //  this.audio.volume = 0.5;
-        //this.audio.play()
-    //}
+    overSound () { 
+    this.audio.volume = 0.3;
+    this.audio.play()
+    }
 }
 
 
@@ -227,16 +229,17 @@ class LostGame {
         this.height = $canvas.height
         this.image = new Image ()
         this.image.src = "/acr_images/you_lost.JPEG"
-        //this.audio = new Audio ------------------------------------------------AUDIO PENDIENTE
-        //this.audio.src = 
+        this.audio = new Audio 
+        this.audio.src = "/sounds/zapsplat_cartoon_chicken_cluck_loud_001_51362.mp3"
     }
+
     draw () {
         ctx.drawImage(this.image, this.x, this.y, this.width, this.height)
     }
-    //overSound () { -----------------------------------------------------------CONFIGURACIÓN DE AUDIO PENDIENTE
-      //  this.audio.volume = 0.5;
-        //this.audio.play()
-    //}
+    overSound () { 
+        this.audio.volume = 0.3;
+        this.audio.play()
+    }
 }
 
 
@@ -244,6 +247,7 @@ class LostGame {
 //-----------------------------------------CREAR INSTANCIAS DE LAS CLASES
 boardImage = "/acr_images/skyline.purple.jpeg"
 pollitoImage = "/acr_images/pink_pollito.PNG"
+instructionsImage ="/acr_images/instructions.jpg"
 
 const background = new Background(0,0, $canvas.width, $canvas.height, boardImage);
 const floor = new Floor();
@@ -251,7 +255,7 @@ const pollito = new Pollito(50,0, $canvas.width, $canvas.height, pollitoImage);
 let score = new Score;
 const wonGame = new WonGame();
 const lostGame = new LostGame();
-
+const instructions = new Background(0, 0, $canvas.width, $canvas.height, instructionsImage);
 
 
 // ----------------------------   FUNCIONES DE FLUJO   --------------------------------//
@@ -264,7 +268,7 @@ function start() {
 
 function update () {
     checkKeys(); 
-    //frames++; 
+    frames++; 
     clearCanvas(); 
     background.draw(); 
     floor.draw(); 
@@ -276,9 +280,8 @@ function update () {
     friendCollition();
     enemyCollition();
     drawScore();
-    
-
 }
+
 
 function enemyCollition() {
     deaths.forEach((death) => {
@@ -290,12 +293,15 @@ function enemyCollition() {
 
 
 function friendCollition() {
-    elotitos.forEach((elotito) => {
+    elotitos.forEach ((elotito) => {
         if (pollito.isTouchingElotito(elotito)) {
-            score.score++
+            elotitos.shift(elotito)
+        score.score++
         }
     })
 }
+
+
 
 function drawScore() {
     score.draw()
@@ -306,22 +312,25 @@ function gameOver() {
     if (pollito.isTouchingDeath) {
 clearInterval(intervalId)
 lostGame.draw();
-//youLost.overSound()----------------------------------------------> SONIDO PENDIENTE
+lostGame.overSound();
+setTimeout(function() {
+    location.reload() 
+     }, 5000)
     }
 } 
 
 
 function youWon() {
-    if(score.score === 10)
+    if(score.score === 10) {
     clearInterval(intervalId)
     wonGame.draw();
-    //wonGame.overSound()-------------------------------------SONIDO PENDIENTE
-
+    wonGame.overSound()
+    }
 }
 
 
 //-----------------------------FUNCIONES DE APOYO-----------------------
-function clearCanvas() { // LIMPIA CANVAS
+function clearCanvas() { 
     ctx.clearRect(0, 0, $canvas.width, $canvas.height);
 }
 
@@ -332,31 +341,31 @@ function checkKeys () {
 }
 
 
-function generateDeath() { //GENERAR ENEMIGOS
-    if (frames % 300 === 0) {
-        const y = Math.floor(Math.random() * 2);
-        const death = new Death (800, y);
+function generateDeath() { 
+    if (frames % 140 === 0) {
+        const y = Math.floor(Math.random() * 270);
+        const death = new Death (900, y);
             deaths.push(death);
-            // para limpiar el array de los enemigos.
             deaths.forEach((death, index) => {
                 if (death.x + death.width < 0) deaths.splice(1, index);
             });
     }
 }
 
-function drawDeath() { // DIBUJAR ENEMIGOS
+function drawDeath() { 
     deaths.forEach((death) => {
         death.draw()
     })
 }
 
 
-function generateElotito() { // DIBUJAR AMIGO
-    if (frames % 300 === 0) {
-        const y = Math.floor(Math.random() * 5);
-        const elotito = new Elotito (200, y);
-            deaths.push(elotito);
-            deaths.forEach((elotito, index) => {
+
+function generateElotito() { 
+    if (frames % 60 === 0) {
+        const y = Math.floor(Math.random() * 200);
+        const elotito = new Elotito (900, y);
+            elotitos.push(elotito);
+            elotitos.forEach((elotito, index) => {
                 if (elotito.x + elotito.width < 0) elotitos.splice(1, index);
             });
     }
@@ -396,3 +405,7 @@ document.onkeydown = (event) => {
 $startButton.addEventListener ("click", event => {
     start();
 });
+
+window.onload = function () {
+    instructions.draw();
+}
