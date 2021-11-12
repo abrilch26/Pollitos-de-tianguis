@@ -280,6 +280,7 @@ function update () {
     friendCollition();
     enemyCollition();
     drawScore();
+    youWon() 
 }
 
 
@@ -293,9 +294,9 @@ function enemyCollition() {
 
 
 function friendCollition() {
-    elotitos.forEach ((elotito) => {
+    elotitos.forEach ((elotito, index) => {
         if (pollito.isTouchingElotito(elotito)) {
-            elotitos.shift(elotito)
+            elotitos.splice(index, 1)
         score.score++
         }
     })
@@ -321,12 +322,15 @@ setTimeout(function() {
 
 
 function youWon() {
-    if(score.score === 10) {
+    if(score.score === 5) {
     clearInterval(intervalId)
     wonGame.draw();
     wonGame.overSound()
+    setTimeout(function() {
+        location.reload() 
+         }, 5000)
+        }
     }
-}
 
 
 //-----------------------------FUNCIONES DE APOYO-----------------------
