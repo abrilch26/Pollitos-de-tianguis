@@ -10,8 +10,7 @@ const gravity = 1.3;
 const friction = .97;
 const keys = {}
 const deaths = []; //obstaculo
-const elotitos = []; // friend
-const elotitosRecogidos = []
+const elotitos = [] // friend
 let win = false;
 let lose = false;
 
@@ -69,38 +68,26 @@ class Pollito {
         this.image = new Image();
         this.image.src = "/acr_images/pollito_azul.PNG"
         // vertical  physics
-        this.vx = 0;
-        this.vy= 0;
-        this.jumping = false;
-        this.jumps = 0;
-        this.jumpStrength = 27;
-        this.score2 = 0;
-        this.imageElotito = new Image()
-        this.imageElotito.src = elotitoImage
-        
+        this.vx = 0
+        this.vy= 0
+        this.jumping = false
+        this.jumps = 0
+        this.jumpStrength = 27
     }
 
     draw () {
         this.vy += gravity;
         this.vx *= friction;
         this.y += this.vy;
-        this.x += this.vx;
+        this.x += this.vx
 
         if (this.y > $canvas.height - this.height) {
             this.y = $canvas.height- this.height-15;
             this.jumps = 0;
-            this.jumping = false;
+            this.jumping = false
         } 
         ctx.drawImage(this.image, this.x, this.y, this.width, this.height);
         }
-
-    drawScore () {
-        ctx.font = "30px helvetica"
-        ctx.fillStyle = "white"
-        ctx.fillText(this.score2, $canvas.width-70, 40) 
-        ctx.drawImage (this.imageElotito, $canvas.width-125, 15, 30,30)
-    }
-        
     
 
     jump(){
@@ -125,16 +112,16 @@ class Pollito {
         this.vx = 0
     }
 
-    isTouching (obj) {
+    isTouchingDeath (death) {
         return (
-            this.x < obj.x + obj.width &&
-            this.x + this.width > obj.x &&
-            this.y < obj.y + obj.height &&
-            this.y + this.height > obj.y
+            this.x < death.x + death.width &&
+            this.x + this.width > death.x &&
+            this.y < death.y + death.height &&
+            this.y + this.height > death.y
         );
     }
 
-    /*isTouchingElotito(elotito) {
+    isTouchingElotito (elotito) {
         return (
             this.x < elotito.x + elotito.width &&
             this.x + this.width > elotito.x &&
@@ -142,7 +129,6 @@ class Pollito {
             this.y + this.height > elotito.y
         );  
     }
-    */
 }
 
 
@@ -161,7 +147,7 @@ class Death {
         ctx.drawImage(this.image, this.x, this.y, this.width, this.height)
     }
 
- /*   isTouchingPollito(pollito) {
+    isTouchingPollito(pollito) {
         return (
             this.x < pollito.x + pollito.width &&
             this.x + this.width > pollito.x &&
@@ -169,7 +155,6 @@ class Death {
             this.y + this.height > pollito.y
         )
     }
-    */
 }
 
 
@@ -181,15 +166,14 @@ class Elotito {
         this.height = 40;
         this.image = new Image();
         this.image.src = "/acr_images/elotito_hd.png"
-        this.recogido = false;
     } 
 
     draw() {
         this.x -= 5;
         ctx.drawImage(this.image, this.x, this.y, this.width, this.height)
     }
-}
-   /* isTouchingPollito2(pollito) {
+
+    isTouchingPollito2(pollito) {
         return (
             this.x < pollito.x + pollito.width &&
             this.x + this.width > pollito.x &&
@@ -197,10 +181,9 @@ class Elotito {
             this.y + this.height > pollito.y
         )
     }
-    
 }
 
-/*
+
 class Score {
     constructor() {
         this.x = $canvas.width-50
@@ -215,7 +198,6 @@ class Score {
         ctx.fillText(this.score, $canvas.width-70, 40) 
         ctx.drawImage (this.image,$canvas.width-125, 15, 30,30)}
 }
-*/
 
 class WonGame {
     constructor () {
@@ -266,12 +248,11 @@ class LostGame {
 boardImage = "/acr_images/skyline.purple.jpeg"
 pollitoImage = "/acr_images/pink_pollito.PNG"
 instructionsImage ="/acr_images/instructions.jpg"
-elotitoImage = "/acr_images/elotito_hd.png"
 
 const background = new Background(0,0, $canvas.width, $canvas.height, boardImage);
 const floor = new Floor();
 const pollito = new Pollito(50,0, $canvas.width, $canvas.height, pollitoImage);
-//const score = new Score();
+let score = new Score;
 const wonGame = new WonGame();
 const lostGame = new LostGame();
 const instructions = new Background(0, 0, $canvas.width, $canvas.height, instructionsImage);
@@ -304,7 +285,7 @@ function update () {
 
 function enemyCollition() {
     deaths.forEach((death) => {
-        if(pollito.isTouching(death)) {
+        if(pollito.isTouchingDeath(death)) {
             gameOver();
         }
     })
@@ -317,38 +298,34 @@ function friendCollition() {
             elotitos.shift(elotito)
         score.score++
         }
-    }) 
+    })
 }
 
 
+
 function drawScore() {
-   pollito.drawScore();
+    score.draw()
 }
 
 
 function gameOver() {
-    deaths.forEach((death) => {
-        if (pollito.isTouching(death)) {
-            clearInterval(intervalId)
-            lostGame.draw();
-            lostGame.overSound();
-            setTimeout(function() {
-                location.reload() 
-                 }, 5000)
-                }
-            })
-        } 
+    if (pollito.isTouchingDeath) {
+clearInterval(intervalId)
+lostGame.draw();
+lostGame.overSound();
+setTimeout(function() {
+    location.reload() 
+     }, 5000)
+    }
+} 
 
 
 function youWon() {
-    for (let i = 0; elotitos.length; i++) {
-        if(pollito.score2 === 5) {
-            clearInterval(intervalId)
-            wonGame.draw();
-            wonGame.overSound()
-            }
+    if(score.score === 10) {
+    clearInterval(intervalId)
+    wonGame.draw();
+    wonGame.overSound()
     }
-   
 }
 
 
@@ -367,7 +344,7 @@ function checkKeys () {
 function generateDeath() { 
     if (frames % 140 === 0) {
         const y = Math.floor(Math.random() * 270);
-        const death = new Death (970, y);
+        const death = new Death (900, y);
             deaths.push(death);
             deaths.forEach((death, index) => {
                 if (death.x + death.width < 0) deaths.splice(1, index);
@@ -388,30 +365,20 @@ function generateElotito() {
         const y = Math.floor(Math.random() * 200);
         const elotito = new Elotito (900, y);
             elotitos.push(elotito);
-           // elotitos.forEach((elotito, index) => {
-             //   if (elotito.x + elotito.width < 0) elotitos.splice(1, index);
-       //     });
+            elotitos.forEach((elotito, index) => {
+                if (elotito.x + elotito.width < 0) elotitos.splice(1, index);
+            });
     }
 }
 
 function drawElotito() { // DIBUJAR AMIGOS
-        elotitos.forEach ((elotito) => {
-           
-            if (pollito.isTouching(elotito)) {
-                console.log("touching")
-                //pollito.score2.push(elotito)
-                elotitos.splice(elotito,1) 
-                pollito.score2 ++
-                //elotitos--; 
-                //elotesRecogidos();
-            }  elotito.draw();
-        if (elotitos.y > 700) {
-            elotitos.splice(elotito, 1)
+    elotitos.forEach((elotito, index) => {
+        if (elotitos.x > 700) {
+            elotitos.splice(index, 1)
         }
+        elotito.draw()
     })
 }
-
-
 
 //------------------------------------   USUARIO & KEYS   -----------------------------------//
 
